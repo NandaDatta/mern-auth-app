@@ -24,6 +24,20 @@ const userScehma = new mongoose.Schema({
         minlength: 6,
         select: false,
     },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+    isEmailVerfied: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: String,
+    emailVerificationExpire: Date,
+    lastLogin: Date,
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: Date,
     createdAt: {
         type: Date,
         default: Date.now
@@ -41,5 +55,10 @@ userScehma.pre('save', async function() {
 userScehma.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Check if account is locked
+userScehma.methods.isLocked = function () {
+    return this.lockUntil && this.lockUntil > Date.now();
+}
 
 module.exports = mongoose.model('User', userScehma);
